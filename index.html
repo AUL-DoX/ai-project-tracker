@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発プロジェクト管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .ai-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .ai-option {
+            position: relative;
+        }
+
+        .ai-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .ai-option label {
+            display: block;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .ai-option input[type="radio"]:checked + label {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .project-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .project-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .ai-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .ai-badge.claude {
+            background: #d4a574;
+            color: white;
+        }
+
+        .ai-badge.chatgpt {
+            background: #10a37f;
+            color: white;
+        }
+
+        .ai-badge.gemini {
+            background: #4285f4;
+            color: white;
+        }
+
+        .project-date {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .project-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-small:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .export-import {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI開発プロジェクト管理</h1>
+            <p>Claude、ChatGPT、Geminiで開発したプロジェクトを一元管理</p>
+        </div>
+
+        <div class="content">
+            <!-- 統計情報 -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalProjects">0</div>
+                    <div class="stat-label">総プロジェクト数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="chatgptCount">0</div>
+                    <div class="stat-label">ChatGPT</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="geminiCount">0</div>
+                    <div class="stat-label">Gemini</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="claudeCount">0</div>
+                    <div class="stat-label">Claude</div>
+                </div>
+            </div>
+
+            <!-- プロジェクト追加フォーム -->
+            <div class="form-section">
+                <h2 style="margin-bottom: 20px;">📝 新規プロジェクト登録</h2>
+                <form id="projectForm">
+                    <div class="form-group">
+                        <label for="projectName">プロジェクト名 *</label>
+                        <input type="text" id="projectName" required placeholder="例: タスク管理アプリ">
+                    </div>
+
+                    <div class="form-group">
+                        <label>使用AI *</label>
+                        <div class="ai-selector">
+                            <div class="ai-option">
+                                <input type="radio" id="aiChatGPT" name="ai" value="chatgpt" required>
+                                <label for="aiChatGPT">ChatGPT</label>
+                            </div>
+                            <div class="ai-option">
+                                <input type="radio" id="aiGemini" name="ai" value="gemini">
+                                <label for="aiGemini">Gemini</label>
+                            </div>
+                            <div class="ai-option">
+                                <input type="radio" id="aiClaude" name="ai" value="claude">
+                                <label for="aiClaude">Claude</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="projectDate">開発日</label>
+                        <input type="date" id="projectDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="projectDescription">説明・メモ</label>
+                        <textarea id="projectDescription" placeholder="プロジェクトの詳細、使った技術、工夫した点など"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="projectTags">タグ（カンマ区切り）</label>
+                        <input type="text" id="projectTags" placeholder="例: Python, Webアプリ, データ分析">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="projectUrl">関連URL（任意）</label>
+                        <input type="text" id="projectUrl" placeholder="例: GitHubリポジトリ、デモサイトなど">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">✨ プロジェクトを追加</button>
+                </form>
+            </div>
+
+            <!-- エクスポート・インポート -->
+            <div class="export-import">
+                <button class="btn btn-secondary" onclick="exportData()">📥 データをエクスポート</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📤 データをインポート</button>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+            </div>
+
+            <!-- フィルター・検索 -->
+            <div class="filter-section">
+                <button class="filter-btn active" data-filter="all">すべて</button>
+                <button class="filter-btn" data-filter="chatgpt">ChatGPT</button>
+                <button class="filter-btn" data-filter="gemini">Gemini</button>
+                <button class="filter-btn" data-filter="claude">Claude</button>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="🔍 プロジェクト名・説明・タグで検索...">
+                </div>
+            </div>
+
+            <!-- プロジェクト一覧 -->
+            <div id="projectsList" class="projects-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        let projects = [];
+        let currentFilter = 'all';
+        let editingId = null;
+
+        // ローカルストレージからデータ読み込み
+        function loadProjects() {
+            const saved = localStorage.getItem('aiProjects');
+            if (saved) {
+                projects = JSON.parse(saved);
+            }
+            renderProjects();
+            updateStats();
+        }
+
+        // ローカルストレージにデータ保存
+        function saveProjects() {
+            localStorage.setItem('aiProjects', JSON.stringify(projects));
+        }
+
+        // プロジェクト追加
+        document.getElementById('projectForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const project = {
+                id: editingId || Date.now(),
+                name: document.getElementById('projectName').value,
+                ai: document.querySelector('input[name="ai"]:checked').value,
+                date: document.getElementById('projectDate').value || new Date().toISOString().split('T')[0],
+                description: document.getElementById('projectDescription').value,
+                tags: document.getElementById('projectTags').value.split(',').map(t => t.trim()).filter(t => t),
+                url: document.getElementById('projectUrl').value,
+                createdAt: editingId ? projects.find(p => p.id === editingId).createdAt : new Date().toISOString()
+            };
+
+            if (editingId) {
+                const index = projects.findIndex(p => p.id === editingId);
+                projects[index] = project;
+                editingId = null;
+            } else {
+                projects.unshift(project);
+            }
+
+            saveProjects();
+            renderProjects();
+            updateStats();
+            this.reset();
+
+            // フォームリセット後のボタンテキスト変更
+            document.querySelector('#projectForm button[type="submit"]').textContent = '✨ プロジェクトを追加';
+        });
+
+        // プロジェクト表示
+        function renderProjects() {
+            const container = document.getElementById('projectsList');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            let filtered = projects.filter(p => {
+                const matchesFilter = currentFilter === 'all' || p.ai === currentFilter;
+                const matchesSearch = !searchTerm || 
+                    p.name.toLowerCase().includes(searchTerm) ||
+                    p.description.toLowerCase().includes(searchTerm) ||
+                    p.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+                return matchesFilter && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <h3>プロジェクトがありません</h3>
+                        <p>上のフォームから新しいプロジェクトを追加しましょう！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(project => `
+                <div class="project-card">
+                    <div class="project-header">
+                        <div>
+                            <div class="project-title">${escapeHtml(project.name)}</div>
+                            <div class="project-date">📅 ${project.date}</div>
+                        </div>
+                        <span class="ai-badge ${project.ai}">${getAIName(project.ai)}</span>
+                    </div>
+                    ${project.description ? `<div class="project-description">${escapeHtml(project.description)}</div>` : ''}
+                    ${project.tags.length > 0 ? `
+                        <div class="project-tags">
+                            ${project.tags.map(tag => `<span class="tag">#${escapeHtml(tag)}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                    ${project.url ? `<div style="margin-bottom: 10px;"><a href="${escapeHtml(project.url)}" target="_blank" style="color: #667eea; text-decoration: none; font-size: 14px;">🔗 リンクを開く</a></div>` : ''}
+                    <div class="project-actions">
+                        <button class="btn-small btn-edit" onclick="editProject(${project.id})">✏️ 編集</button>
+                        <button class="btn-small btn-delete" onclick="deleteProject(${project.id})">🗑️ 削除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // プロジェクト編集
+        function editProject(id) {
+            const project = projects.find(p => p.id === id);
+            if (!project) return;
+
+            editingId = id;
+            document.getElementById('projectName').value = project.name;
+            document.querySelector(`input[name="ai"][value="${project.ai}"]`).checked = true;
+            document.getElementById('projectDate').value = project.date;
+            document.getElementById('projectDescription').value = project.description;
+            document.getElementById('projectTags').value = project.tags.join(', ');
+            document.getElementById('projectUrl').value = project.url;
+
+            document.querySelector('#projectForm button[type="submit"]').textContent = '💾 プロジェクトを更新';
+            document.getElementById('projectForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // プロジェクト削除
+        function deleteProject(id) {
+            if (confirm('このプロジェクトを削除してもよろしいですか？')) {
+                projects = projects.filter(p => p.id !== id);
+                saveProjects();
+                renderProjects();
+                updateStats();
+            }
+        }
+
+        // 統計情報更新
+        function updateStats() {
+            document.getElementById('totalProjects').textContent = projects.length;
+            document.getElementById('chatgptCount').textContent = projects.filter(p => p.ai === 'chatgpt').length;
+            document.getElementById('geminiCount').textContent = projects.filter(p => p.ai === 'gemini').length;
+            document.getElementById('claudeCount').textContent = projects.filter(p => p.ai === 'claude').length;
+        }
+
+        // フィルターボタン
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                renderProjects();
+            });
+        });
+
+        // 検索
+        document.getElementById('searchInput').addEventListener('input', renderProjects);
+
+        // データエクスポート
+        function exportData() {
+            const dataStr = JSON.stringify(projects, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ai-projects-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // データインポート
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (confirm(`${imported.length}件のプロジェクトをインポートします。既存のデータは上書きされます。よろしいですか？`)) {
+                        projects = imported;
+                        saveProjects();
+                        renderProjects();
+                        updateStats();
+                        alert('インポートが完了しました！');
+                    }
+                } catch (error) {
+                    alert('ファイルの読み込みに失敗しました。正しいJSONファイルか確認してください。');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // ユーティリティ関数
+        function getAIName(ai) {
+            const names = {
+                'claude': 'Claude',
+                'chatgpt': 'ChatGPT',
+                'gemini': 'Gemini'
+            };
+            return names[ai] || ai;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 初期化
+        loadProjects();
+
+        // 今日の日付をデフォルトにセット
+        document.getElementById('projectDate').valueAsDate = new Date();
+    </script>
+</body>
+</html>
